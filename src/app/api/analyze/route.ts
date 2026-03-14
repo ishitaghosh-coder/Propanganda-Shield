@@ -20,6 +20,18 @@ const mockResponse = {
     narrativeType: "Conspiracy Disinformation Campaign",
     campaignGoal: "Erode public trust in media and government institutions by promoting unfounded cover-up theories.",
   },
+  campaignDetection: {
+    campaignName: "Anti-Vax Institutional Cover-Up",
+    campaignType: "Harm-Inducing Disinformation",
+    campaignGoal: "Decrease vaccination rates and erode public trust in global health agencies.",
+    confidence: 96
+  },
+  threatIndicators: {
+    healthMisinformation: 98,
+    politicalDisinformation: 75,
+    financialScam: 10,
+    conspiracyNarrative: 95
+  },
   viralityRisk: 87,
   confidenceScore: 94,
   explanation: "⚠ DEMO MODE — This is a pre-built demonstration response. The analyzed content exhibits multiple high-severity propaganda markers: fear appeal and urgency manipulation pressure readers into sharing without verification. 'Mainstream media is lying' is a classic trust-erosion tactic. Urgency phrases exploit cognitive shortcuts and prevent critical thinking.",
@@ -50,8 +62,8 @@ async function searchWikipedia(query: string) {
     const res = await fetch(url);
     const data = await res.json();
     if (data.query?.search?.length > 0) {
-      // Return the top 2 snippets
-      return data.query.search.slice(0, 2).map((item: any) => ({
+      // Return the top 5 snippets for broader consensus verified checking
+      return data.query.search.slice(0, 5).map((item: any) => ({
         title: item.title,
         snippet: item.snippet.replace(/<[^>]*>?/gm, ''), // strip html tags
         url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`
@@ -104,6 +116,18 @@ You MUST return ONLY this JSON structure, with ALL fields filled in:
     "narrativeType": <string>,
     "campaignGoal": <string>
   },
+  "campaignDetection": {
+    "campaignName": <string, inferred name of the broader misinformation campaign>,
+    "campaignType": <string, e.g., 'Targeted Disinformation', 'Astro-turfing', 'Financial Scam'>,
+    "campaignGoal": <string, what the real-world objective of the campaign is>,
+    "confidence": <integer 0-100, how confident you are this is part of a coordinated campaign>
+  },
+  "threatIndicators": {
+    "healthMisinformation": <integer 0-100 risk score>,
+    "politicalDisinformation": <integer 0-100 risk score>,
+    "financialScam": <integer 0-100 risk score>,
+    "conspiracyNarrative": <integer 0-100 risk score>
+  },
   "viralityRisk": <integer 0-100>,
   "confidenceScore": <integer 0-100>,
   "explanation": <string, 2-4 sentences>
@@ -143,10 +167,11 @@ You MUST return ONLY this JSON structure, with ALL fields filled in:
         );
 
         // 2b. Evidence Comparison: Second prompt to Gemini
-        const factCheckPrompt = `You are a strict, objective fact-checker. 
-Evaluate the following claims against the provided evidence retrieved from Wikipedia.
+        const factCheckPrompt = `You are a strict, objective fact-checker performing Cross-Source Fact Verification.
+Evaluate the following claims against the provided multiple pieces of evidence retrieved from Wikipedia.
 
-For each claim, return a JSON object with a verdict ('True', 'False', 'Misleading', or 'Unverified'), a short 1-2 sentence summary of the evidence, and the URLs of the sources used to reach that verdict.
+For each claim, synthesize the evidence to form a consensus verdict ('True', 'False', 'Misleading', or 'Unverified'). 
+Provide a short 1-2 sentence summary of the consensus evidence, and list ALL the URLs of the sources used to reach that verdict.
 
 Claims and Evidence:
 ${JSON.stringify(claimsWithEvidence, null, 2)}

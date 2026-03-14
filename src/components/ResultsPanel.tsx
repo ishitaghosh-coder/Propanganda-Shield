@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { AlertTriangle, Hash, Info, Network, Flame, CheckCircle2, BookOpen } from "lucide-react";
 import { AnalysisResult } from "@/app/scanner/page";
+import ThreatLandscape from "./ThreatLandscape";
 
 function escapeRegExp(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -73,64 +74,8 @@ export default function ResultsPanel({ result, originalText }: { result: Analysi
           </p>
         </div>
       </div>
-
-      {/* ── 2. NARRATIVE DETECTION CARD ── */}
-      {result.narrativeDetection && (
-        <div className="card" style={{
-          padding: "24px 28px",
-          border: "1px solid rgba(168,85,247,0.35)",
-          background: "rgba(168,85,247,0.05)",
-          position: "relative",
-          overflow: "hidden",
-        }}>
-          {/* Top accent line */}
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0, height: 2,
-            background: "linear-gradient(90deg, transparent, var(--neon-purple), transparent)",
-          }} />
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: "rgba(168,85,247,0.15)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              border: "1px solid rgba(168,85,247,0.3)",
-            }}>
-              <Network size={15} style={{ color: "var(--neon-purple)" }} />
-            </div>
-            <div>
-              <p className="label" style={{ color: "rgba(168,85,247,0.8)" }}>Propaganda Narrative Detected</p>
-            </div>
-          </div>
-          {/* Fields */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: 160 }}>
-                <p className="label" style={{ marginBottom: 4 }}>Narrative</p>
-                <p style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--neon-purple)" }}>
-                  {result.narrativeDetection.narrativeName}
-                </p>
-              </div>
-              <div style={{ flex: 1, minWidth: 160 }}>
-                <p className="label" style={{ marginBottom: 4 }}>Type</p>
-                <p style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--text-primary)" }}>
-                  {result.narrativeDetection.narrativeType}
-                </p>
-              </div>
-            </div>
-            <div style={{
-              background: "rgba(0,0,0,0.25)",
-              borderRadius: 8, padding: "12px 16px",
-              border: "1px solid rgba(168,85,247,0.15)",
-            }}>
-              <p className="label" style={{ marginBottom: 6, color: "rgba(168,85,247,0.7)" }}>Campaign Goal</p>
-              <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", lineHeight: 1.6 }}>
-                {result.narrativeDetection.campaignGoal}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── 2. THREAT LANDSCAPE & CAMPAIGN MATRIX ── */}
+      <ThreatLandscape indicators={result.threatIndicators} campaign={result.campaignDetection} />
 
       {/* ── FACT CHECKING RAG PANEL ── */}
       {result.factCheck && result.factCheck.length > 0 && (

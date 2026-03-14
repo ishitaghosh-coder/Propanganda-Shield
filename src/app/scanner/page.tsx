@@ -16,6 +16,18 @@ export interface AnalysisResult {
     narrativeType: string;
     campaignGoal: string;
   };
+  campaignDetection?: {
+    campaignName: string;
+    campaignType: string;
+    campaignGoal: string;
+    confidence: number;
+  };
+  threatIndicators?: {
+    healthMisinformation: number;
+    politicalDisinformation: number;
+    financialScam: number;
+    conspiracyNarrative: number;
+  };
   viralityRisk: number;
   confidenceScore: number;
   explanation: string;
