@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Scan, FileText, Image, Zap, AlertTriangle, ChevronRight } from "lucide-react";
+import { Scan, FileText, Image, Zap, AlertTriangle } from "lucide-react";
 import ResultsPanel from "@/components/ResultsPanel";
 
 export interface AnalysisResult {
@@ -22,20 +22,7 @@ export interface AnalysisResult {
   extractedText?: string;
 }
 
-const SAMPLE_TEXTS = [
-  {
-    label: "Fear Propaganda",
-    text: `BREAKING: The mainstream media is LYING to you about the new vaccine. Government officials don't want you to know the hidden truth they've been burying for years. Millions of people are waking up to the REAL agenda. Share this before it gets deleted! This is the most dangerous cover-up in history and our time is running out!`,
-  },
-  {
-    label: "Political Bias",
-    text: `The radical left-wing politicians are destroying our nation with their dangerous socialist agenda. Real patriots know that only our leader can save us from the corrupt elites who hate our values. Anyone who disagrees is either a traitor or a fool. We must stand together and fight back NOW!`,
-  },
-  {
-    label: "Neutral News",
-    text: `The city council voted 7-2 to approve the new infrastructure bill on Tuesday. The bill allocates $4.2 million for road repairs and $1.8 million for public transit improvements over the next fiscal year. Council member Smith cited traffic data showing a 15% increase in commute times. The bill will be signed by the mayor next week.`,
-  },
-];
+
 
 export default function ScannerPage() {
   const [tab, setTab] = useState<"text" | "image">("text");
@@ -288,44 +275,7 @@ export default function ScannerPage() {
             </div>
           </div>
 
-          {/* Sample Texts */}
-          <div className="card" style={{ padding: 20 }}>
-            <p className="label" style={{ marginBottom: 14 }}>Try a sample</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {SAMPLE_TEXTS.map(({ label, text: sampleText }) => (
-                <button
-                  key={label}
-                  onClick={() => { setTab("text"); setText(sampleText); }}
-                  style={{
-                    background: "var(--surface)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    padding: "10px 14px",
-                    color: "var(--text-secondary)",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "0.82rem",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-bright)";
-                    (e.currentTarget as HTMLButtonElement).style.color = "var(--text-primary)";
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
-                    (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)";
-                  }}
-                >
-                  <span>{label}</span>
-                  <ChevronRight size={14} />
-                </button>
-              ))}
-            </div>
-          </div>
+
         </div>
 
         {/* ── RIGHT: RESULTS / LOADING / STANDBY ── */}

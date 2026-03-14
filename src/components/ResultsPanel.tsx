@@ -281,15 +281,6 @@ export default function ResultsPanel({ result, originalText }: { result: Analysi
         </div>
       )}
 
-      {/* ── 5. EXPLANATION ── */}
-      <div className="card" style={{ padding: "20px 24px", background: "rgba(0,180,245,0.03)", borderColor: "rgba(0,180,245,0.15)" }}>
-        <p className="label" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
-          <Info size={13} style={{ color: "var(--neon-blue)" }} /> Intelligence Report
-        </p>
-        <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.8 }}>
-          {result.explanation}
-        </p>
-      </div>
     </div>
   );
 }

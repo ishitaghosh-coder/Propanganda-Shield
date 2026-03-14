@@ -9,7 +9,7 @@
 
 **PropagandaShield AI** is an advanced intelligence dashboard built to detect, analyze, and neutralize misinformation, political bias, and psychological manipulation in real-time. Whether it's a suspicious news headline, a viral tweet, or a screenshot of a WhatsApp forward, PropagandaShield breaks down the cognitive threats before they spread.
 
-Built for hackathons, this tool combines **Client-side OCR** with **Google Gemini 2.0 Flash** to provide instant, sub-second threat intelligence right in the browser.
+This tool combines **Client-side OCR** with **Google Gemini 2.0 Flash** to provide instant, sub-second threat intelligence right in the browser.
 
 ---
 
@@ -23,7 +23,7 @@ Built for hackathons, this tool combines **Client-side OCR** with **Google Gemin
   - **Virality Risk** (Low to High Spread Potential)
 - **🎯 Tactic Explainability**: Highlights the exact flagged phrases verbatim in the original text, explaining the psychological manipulation techniques used (e.g., "Fear Appeal", "Card Stacking").
 - **🔒 "Cyber Threat" Dashboard UI**: A premium, dark-mode-first interface built from scratch with Vanilla CSS—featuring neon accents, custom gauges, and multi-stage animated loading sequences.
-- **🛡️ Built-in Resilience**: If the API key runs out or hits a rate limit, the system gracefully degrades to a "Demo Mode" fallback response, ensuring the dashboard is **always** presentation-ready for judges.
+- **🛡️ Built-in Resilience**: If the API key is unconfigured or hits a rate limit, the system gracefully degrades to a "Demo Mode" fallback response.
 
 ---
 
@@ -43,8 +43,8 @@ To run this project locally:
 
 ### 1. Clone the repository
 \`\`\`bash
-git clone https://github.com/yourusername/propaganda-shield.git
-cd propaganda-shield
+git clone https://github.com/yourusername/propagandashield.git
+cd propagandashield
 \`\`\`
 
 ### 2. Install dependencies
@@ -58,7 +58,6 @@ Create a `.env.local` file in the root directory:
 \`\`\`bash
 GEMINI_API_KEY=your_api_key_here
 \`\`\`
-*(Note: If no key is provided, the app will automatically run in Demo/Mock Mode)*
 
 ### 4. Start the Development Server
 \`\`\`bash
