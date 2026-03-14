@@ -23,7 +23,45 @@ const mockResponse = {
   viralityRisk: 87,
   confidenceScore: 94,
   explanation: "⚠ DEMO MODE — This is a pre-built demonstration response. The analyzed content exhibits multiple high-severity propaganda markers: fear appeal and urgency manipulation pressure readers into sharing without verification. 'Mainstream media is lying' is a classic trust-erosion tactic. Urgency phrases exploit cognitive shortcuts and prevent critical thinking.",
+  claims: [
+    "The mainstream media is lying about the new vaccine.",
+    "Government officials are burying the hidden truth about the vaccine.",
+  ],
+  factCheck: [
+    {
+      claim: "The mainstream media is lying about the new vaccine.",
+      verdict: "Unverified",
+      evidenceSummary: "This is a broad, subjective claim often used in conspiracy theories to erode trust in institutions. Specific, verifiable claims about the vaccine are required for thorough fact-checking.",
+      sources: [],
+    },
+    {
+      claim: "Government officials are burying the hidden truth about the vaccine.",
+      verdict: "False",
+      evidenceSummary: "Extensive public health data and independent scientific studies globally track vaccine efficacy and safety, contradicting claims of a coordinated government cover-up.",
+      sources: ["https://en.wikipedia.org/wiki/COVID-19_vaccine_misinformation_and_hesitancy"],
+    }
+  ]
 };
+
+// Helper: Fetch summaries from Wikipedia API
+async function searchWikipedia(query: string) {
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.query?.search?.length > 0) {
+      // Return the top 2 snippets
+      return data.query.search.slice(0, 2).map((item: any) => ({
+        title: item.title,
+        snippet: item.snippet.replace(/<[^>]*>?/gm, ''), // strip html tags
+        url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`
+      }));
+    }
+  } catch (error) {
+    console.error("Wikipedia search failed:", error);
+  }
+  return [];
+}
 
 export async function POST(req: Request) {
   try {
@@ -60,6 +98,7 @@ You MUST return ONLY this JSON structure, with ALL fields filled in:
   "threatClassification": <one of: "None", "State Propaganda", "Information Manipulation", "Fear Mongering", "Psychological Influence", "Hate Speech Adjacent", "Conspiracy Theory", "Disinformation">,
   "techniques": [<strings of propaganda technique names>],
   "flaggedPhrases": [<exact verbatim substrings from the original text that are manipulative>],
+  "claims": [<strings extracting specific, verifiable factual claims made in the text. Maximum 3 claims. Return empty array if no factual claims are made.>],
   "narrativeDetection": {
     "narrativeName": <string>,
     "narrativeType": <string>,
@@ -89,6 +128,61 @@ You MUST return ONLY this JSON structure, with ALL fields filled in:
         .trim();
 
       const json = JSON.parse(cleaned);
+
+      // ── Step 2 & 3: RAG Fact-Checking Pipeline ──
+      let factCheckResults = [];
+      const extractedClaims = json.claims || [];
+
+      if (extractedClaims.length > 0) {
+        // 2a. Retrieval: Fetch evidence for each claim from Wikipedia
+        const claimsWithEvidence = await Promise.all(
+          extractedClaims.slice(0, 3).map(async (claim: string) => { // limit to top 3 claims for speed
+            const evidence = await searchWikipedia(claim);
+            return { claim, evidence };
+          })
+        );
+
+        // 2b. Evidence Comparison: Second prompt to Gemini
+        const factCheckPrompt = `You are a strict, objective fact-checker. 
+Evaluate the following claims against the provided evidence retrieved from Wikipedia.
+
+For each claim, return a JSON object with a verdict ('True', 'False', 'Misleading', or 'Unverified'), a short 1-2 sentence summary of the evidence, and the URLs of the sources used to reach that verdict.
+
+Claims and Evidence:
+${JSON.stringify(claimsWithEvidence, null, 2)}
+
+Return ONLY a JSON array of objects matching this exact structure:
+[
+  {
+    "claim": "string",
+    "verdict": "True | False | Misleading | Unverified",
+    "evidenceSummary": "string",
+    "sources": ["string url"]
+  }
+]`;
+
+        const factCheckResponse = await ai.models.generateContent({
+          model: "gemini-2.0-flash", // Fast model for evaluation
+          contents: factCheckPrompt,
+          config: {
+            temperature: 0.1,
+            responseMimeType: "application/json",
+          },
+        });
+
+        const fcRawText = factCheckResponse.text;
+        if (fcRawText) {
+          const fcCleaned = fcRawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+          try {
+            factCheckResults = JSON.parse(fcCleaned);
+          } catch (e) {
+             console.error("Failed to parse fact-check JSON", e);
+          }
+        }
+      }
+
+      // Merge results
+      json.factCheck = factCheckResults;
 
       return NextResponse.json(json);
     } catch (aiErr: any) {

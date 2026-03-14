@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { AlertTriangle, Hash, Info, Network, Flame, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Hash, Info, Network, Flame, CheckCircle2, BookOpen } from "lucide-react";
 import { AnalysisResult } from "@/app/scanner/page";
 
 function escapeRegExp(s: string) {
@@ -128,6 +128,73 @@ export default function ResultsPanel({ result, originalText }: { result: Analysi
                 {result.narrativeDetection.campaignGoal}
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── FACT CHECKING RAG PANEL ── */}
+      {result.factCheck && result.factCheck.length > 0 && (
+        <div className="card" style={{ padding: "20px 24px" }}>
+          <p className="label" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
+            <BookOpen size={14} style={{ color: "var(--neon-blue)" }} /> Verified Claims & Evidence
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {result.factCheck.map((fc, idx) => {
+              let badgeColor = "var(--text-muted)";
+              let bgBadgeColor = "rgba(255,255,255,0.1)";
+              if (fc.verdict === "True") { badgeColor = "var(--neon-green)"; bgBadgeColor = "rgba(0,255,163,0.1)"; }
+              else if (fc.verdict === "False") { badgeColor = "var(--neon-red)"; bgBadgeColor = "rgba(255,62,108,0.1)"; }
+              else if (fc.verdict === "Misleading") { badgeColor = "var(--neon-yellow)"; bgBadgeColor = "rgba(255,214,10,0.1)"; }
+
+              return (
+                <div key={idx} style={{ 
+                  background: "rgba(0,0,0,0.2)", 
+                  border: "1px solid var(--border)", 
+                  borderRadius: 8, 
+                  padding: "16px",
+                  display: "flex", flexDirection: "column", gap: 8 
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                    <p style={{ fontWeight: 600, fontSize: "0.95rem", color: "var(--text-primary)", lineHeight: 1.5, flex: 1 }}>
+                      &ldquo;{fc.claim}&rdquo;
+                    </p>
+                    <span style={{ 
+                      padding: "4px 10px", borderRadius: 4, fontSize: "0.75rem", fontWeight: 700,
+                      color: badgeColor, background: bgBadgeColor, border: "1px solid " + badgeColor + "40",
+                      fontFamily: "var(--font-mono)", textTransform: "uppercase", whiteSpace: "nowrap"
+                    }}>
+                      {fc.verdict}
+                    </span>
+                  </div>
+                  
+                  {fc.evidenceSummary && (
+                    <div style={{ marginTop: 4 }}>
+                      <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.6 }}>
+                        <strong style={{ color: "var(--text-primary)" }}>Evidence:</strong> {fc.evidenceSummary}
+                      </p>
+                    </div>
+                  )}
+
+                  {fc.sources && fc.sources.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
+                      {fc.sources.map((src, sIdx) => {
+                        let domain = src;
+                        try { domain = new URL(src).hostname.replace('www.', ''); } catch {}
+                        return (
+                          <a key={sIdx} href={src} target="_blank" rel="noreferrer" style={{ 
+                            fontSize: "0.75rem", color: "var(--neon-blue)", textDecoration: "none", 
+                            background: "rgba(0,180,245,0.1)", padding: "2px 8px", borderRadius: 4,
+                            border: "1px solid rgba(0,180,245,0.2)"
+                          }}>
+                            {domain} ↗
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

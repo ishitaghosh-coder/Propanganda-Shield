@@ -20,6 +20,13 @@ export interface AnalysisResult {
   confidenceScore: number;
   explanation: string;
   extractedText?: string;
+  claims?: string[];
+  factCheck?: {
+    claim: string;
+    verdict: "True" | "False" | "Misleading" | "Unverified";
+    evidenceSummary: string;
+    sources: string[];
+  }[];
 }
 
 
