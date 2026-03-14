@@ -37,9 +37,10 @@ export async function POST(req: Request) {
     }
 
     // ── Gemini AI Analysis ──
-    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyBJ41iw0CcAEuWaNjmY2w3z2nxZzuLztMg";
+    const apiKey = process.env.GEMINI_API_KEY;
 
     try {
+      if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
       const ai = new GoogleGenAI({ apiKey });
 
       const prompt = `You are an expert intelligence analyst specializing in propaganda detection, misinformation analysis, and psychological manipulation tactics.
